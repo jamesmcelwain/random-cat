@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THEY LIVE: ALIEN LINEUP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg:#0d0d0e;
+  --paper:#e8e4d9;
+  --red:#c21807;
+  --red2:#7a0e00;
+  --ink:#141414;
+  --card:#1b1b1a;
+  --gray:#8a8478;
+  --grayline:#3a372f;
+  --toxic:#79ff5b;
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;padding:0;height:100%;
+  background:var(--bg);
+  color:var(--paper);
+  font-family:'IBM Plex Mono',monospace;
+  overflow-x:hidden;
+}
+
+/* film grain + vignette overlay */
+body::before{
+  content:"";
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:999;
+  background-image:
+    radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%);
+  mix-blend-mode:multiply;
+}
+body::after{
+  content:"";
+  position:fixed;inset:0;
+  pointer-events:none;
+  z-index:998;
+  opacity:0.05;
+  background-image:repeating-linear-gradient(0deg, #fff 0px, transparent 1px, transparent 2px, #fff 3px);
+  animation:grainshift 1s steps(2) infinite;
+}
+@keyframes grainshift{
+  0%{transform:translate(0,0);}
+  50%{transform:translate(-1px,1px);}
+  100%{transform:translate(1px,-1px);}
+}
+
+#app{
+  position:relative;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:24px 16px 60px;
+}
+
+/* ---------- HEADER ---------- */
+.topbar{
+  width:100%;
+  max-width:980px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:8px;
+  flex-wrap:wrap;
+}
+.brand{
+  font-family:'Anton',sans-serif;
+  font-size:clamp(28px,5vw,44px);
+  letter-spacing:2px;
+  color:var(--paper);
+  text-transform:uppercase;
+  line-height:0.95;
+}
+.brand span{color:var(--red);}
+.tagline{
+  font-size:11px;
+  letter-spacing:3px;
+  color:var(--gray);
+  text-transform:uppercase;
+  margin-top:2px;
+}
+
+.glasses-btn{
+  background:transparent;
+  border:1px solid var(--gray);
+  color:var(--paper);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  padding:10px 16px;
+  cursor:pointer;
+  transition:all .15s ease;
+  white-space:nowrap;
+}
+.glasses-btn:hover{background:var(--paper);color:var(--ink);border-color:var(--paper);}
+.glasses-btn.active{background:var(--toxic);color:#000;border-color:var(--toxic);}
+
+/* ---------- STATUS BAR ---------- */
+.statusbar{
+  width:100%;max-width:980px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:1px solid var(--grayline);
+  border-bottom:1px solid var(--grayline);
+  padding:10px 4px;
+  margin:18px 0 26px;
+  font-size:12px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--gray);
+}
+.statusbar b{color:var(--paper);}
+.round-dots{display:flex;gap:4px;}
+.round-dot{width:9px;height:9px;border:1px solid var(--gray);}
+.round-dot.done{background:var(--red);border-color:var(--red);}
+.round-dot.current{background:var(--paper);border-color:var(--paper);}
+
+/* ---------- LINEUP ---------- */
+.lineup{
+  width:100%;max-width:980px;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+}
+@media(max-width:760px){
+  .lineup{grid-template-columns:repeat(2,1fr);}
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--grayline);
+  cursor:pointer;
+  display:flex;flex-direction:column;
+  align-items:center;
+  padding:14px 10px 12px;
+  position:relative;
+  transition:border-color .15s ease, transform .1s ease;
+}
+.card:hover{border-color:var(--paper);}
+.card.selected{border-color:var(--red);box-shadow:0 0 0 1px var(--red);}
+.card.correct{border-color:var(--toxic);}
+.avatar-wrap.reveal-alien{animation:alienreveal .5s steps(3);}
+@keyframes alienreveal{
+  0%{filter:none;transform:translate(0,0);}
+  20%{filter:invert(1);transform:translate(-2px,1px);}
+  40%{filter:hue-rotate(90deg);transform:translate(2px,-1px);}
+  60%{filter:invert(1) hue-rotate(180deg);transform:translate(-1px,0);}
+  100%{filter:none;transform:translate(0,0);}
+}
+.card.wrong{border-color:var(--red);animation:shake .4s;}
+@keyframes shake{
+  0%,100%{transform:translateX(0);}
+  25%{transform:translateX(-4px);}
+  75%{transform:translateX(4px);}
+}
+
+.plate{
+  font-size:9px;letter-spacing:1px;color:var(--gray);
+  border:1px solid var(--grayline);
+  padding:1px 6px;margin-bottom:8px;
+}
+.avatar-wrap{
+  width:78px;height:88px;
+  margin-bottom:8px;
+  display:flex;align-items:center;justify-content:center;
+}
+.name{
+  font-size:12px;letter-spacing:0.5px;
+  text-align:center;
+  color:var(--paper);
+  margin-bottom:2px;
+  text-transform:uppercase;
+}
+.asked-count{font-size:10px;color:var(--gray);margin-bottom:8px;}
+
+.accuse-btn{
+  width:100%;
+  background:transparent;
+  border:1px solid var(--red);
+  color:var(--red);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:1px;text-transform:uppercase;
+  padding:6px 4px;
+  cursor:pointer;
+}
+.accuse-btn:hover{background:var(--red);color:var(--paper);}
+
+/* ---------- QUESTION PANEL ---------- */
+.panel{
+  width:100%;max-width:980px;
+  margin-top:22px;
+  border:1px solid var(--grayline);
+  background:rgba(255,255,255,0.02);
+  padding:18px;
+  min-height:70px;
+}
+.panel-empty{
+  color:var(--gray);
+  font-size:12px;letter-spacing:1px;
+  text-align:center;
+  text-transform:uppercase;
+  padding:20px 0;
+}
+.panel-header{
+  display:flex;justify-content:space-between;align-items:baseline;
+  border-bottom:1px solid var(--grayline);
+  padding-bottom:10px;margin-bottom:14px;
+  flex-wrap:wrap;gap:8px;
+}
+.panel-header .who{
+  font-size:15px;text-transform:uppercase;letter-spacing:1px;color:var(--paper);
+}
+.panel-header .who small{display:block;color:var(--gray);font-size:10px;letter-spacing:1px;margin-top:2px;}
+.close-panel{background:none;border:none;color:var(--gray);cursor:pointer;font-size:11px;text-transform:uppercase;letter-spacing:1px;}
+.close-panel:hover{color:var(--paper);}
+
+.qlist{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.qbtn{
+  background:transparent;border:1px solid var(--grayline);color:var(--paper);
+  font-family:'IBM Plex Mono',monospace;font-size:11.5px;
+  padding:8px 10px;cursor:pointer;text-align:left;flex:1 1 220px;
+}
+.qbtn:hover:not(:disabled){border-color:var(--red);}
+.qbtn:disabled{opacity:0.3;cursor:not-allowed;}
+
+.transcript{display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto;}
+.line{font-size:12.5px;line-height:1.5;}
+.line .q{color:var(--gray);}
+.line .q::before{content:"Q: ";color:var(--red);}
+.line .a{color:var(--paper);padding-left:14px;}
+.line .a::before{content:"A: ";color:var(--toxic);}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,0.75);
+  display:flex;align-items:center;justify-content:center;
+  z-index:1000;padding:20px;
+}
+.modal{
+  background:var(--card);border:1px solid var(--red);
+  padding:26px;max-width:420px;width:100%;text-align:center;
+}
+.modal h3{
+  font-family:'Anton',sans-serif;font-size:22px;letter-spacing:1px;
+  text-transform:uppercase;margin:0 0 12px;color:var(--paper);
+}
+.modal p{font-size:13px;color:var(--gray);margin-bottom:20px;line-height:1.6;}
+.modal-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.modal-btn{
+  border:1px solid var(--paper);background:transparent;color:var(--paper);
+  font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:1px;
+  text-transform:uppercase;padding:10px 20px;cursor:pointer;
+}
+.modal-btn.primary{background:var(--red);border-color:var(--red);}
+.modal-btn:hover{opacity:0.85;}
+
+/* ---------- START / END SCREENS ---------- */
+.fullscreen{
+  min-height:80vh;width:100%;max-width:700px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:20px;
+}
+.fullscreen h1{
+  font-family:'Anton',sans-serif;
+  font-size:clamp(38px,8vw,68px);
+  letter-spacing:2px;text-transform:uppercase;
+  margin:0 0 8px;line-height:0.95;
+}
+.fullscreen h1 span{color:var(--red);}
+.fullscreen .sub{color:var(--gray);font-size:13px;letter-spacing:2px;text-transform:uppercase;margin-bottom:28px;}
+.fullscreen p.desc{font-size:13.5px;line-height:1.8;color:var(--paper);max-width:520px;margin-bottom:30px;}
+.big-btn{
+  background:var(--red);border:none;color:var(--paper);
+  font-family:'IBM Plex Mono',monospace;font-weight:600;
+  font-size:14px;letter-spacing:2px;text-transform:uppercase;
+  padding:16px 38px;cursor:pointer;
+}
+.big-btn:hover{background:var(--paper);color:var(--ink);}
+.big-btn.ghost{background:transparent;border:1px solid var(--paper);color:var(--paper);}
+.big-btn.ghost:hover{background:var(--paper);color:var(--ink);}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+
+.rules{
+  text-align:left;font-size:12px;color:var(--gray);line-height:1.9;
+  border-left:2px solid var(--red);padding-left:14px;margin-bottom:30px;max-width:520px;
+}
+.rules b{color:var(--paper);}
+
+/* ---------- GLASSES MODE ---------- */
+body.glasses-on{background:#000;}
+body.glasses-on #app{filter:grayscale(1) contrast(1.35);}
+body.glasses-on .accuse-btn,
+body.glasses-on .glasses-btn.active{filter:none;}
+.subliminal{
+  position:fixed;pointer-events:none;z-index:997;
+  font-family:'Anton',sans-serif;color:var(--toxic);
+  text-transform:uppercase;letter-spacing:3px;
+  opacity:0;font-size:28px;
+  filter:none;
+}
+body.glasses-on .subliminal.show{
+  animation:flashword 1.4s ease-in-out;
+}
+@keyframes flashword{
+  0%{opacity:0;} 8%{opacity:0.85;} 16%{opacity:0;} 100%{opacity:0;}
+}
+
+.toast{
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);
+  background:var(--red);color:var(--paper);
+  font-size:12px;letter-spacing:2px;text-transform:uppercase;
+  padding:10px 22px;z-index:1001;
+  animation:toastin .25s ease, toastout .3s ease 1.6s forwards;
+}
+@keyframes toastin{from{opacity:0;transform:translateX(-50%) translateY(-8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@keyframes toastout{to{opacity:0;}}
+
+.footer-note{
+  margin-top:30px;font-size:10.5px;color:var(--grayline);letter-spacing:1px;text-align:center;
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(function(){
+
+/* ---------------- seeded RNG ---------------- */
+function mulberry32(a){
+  return function(){
+    a|=0;a=a+0x6D2B79F5|0;
+    let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };
+}
+function shuffle(arr,rng){
+  const a=arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(rng()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function pick(arr,rng){return arr[Math.floor(rng()*arr.length)];}
+
+/* ---------------- content ---------------- */
+const FIRST_NAMES=["Earl","Marge","Dale","Sherry","Frank","Loretta","Gus","Norma","Ray","Doris",
+"Wade","Peggy","Curt","Beverly","Hank","Joyce","Milt","Carol","Stan","Dottie",
+"Roy","Faye","Gene","Ida","Lyle","Nadine","Vern","Wanda","Otto","Lou"];
+const LAST_NAMES=["Krebs","Holloway","Petrie","Vance","Mercer","Odom","Tackett","Braswell","Gann","Fike",
+"Whitlow","Duckworth","Sowder","Ledbetter","Hovis","Pruett","Sikes","Ussery","Bumgarner","Yow"];
+
+const QUESTIONS=[
+  {
+    text:"What do you think about the working class?",
+    human:["Honestly? I just want my kids to have new shoes for school.","They're the ones actually keeping this town running, if you ask me."],
+    bogie:["Hard work pays off eventually — that's just how it works.","Everyone gets what they earn, more or less."],
+    alien:["The labor class exists to be managed efficiently. It's simply good stewardship.","They are a renewable resource. We rotate them as needed."]
+  },
+  {
+    text:"How do you feel about your neighbors?",
+    human:["Neighbors look out for each other around here. Have to.","She brings us soup every winter. Good people, this block."],
+    bogie:["I keep to myself, mostly. Can't be too careful who you associate with.","I network more than I neighbor, if that makes sense."],
+    alien:["Neighbors are a resource allocation problem, wouldn't you agree?","Proximity is a logistics matter. Nothing more."]
+  },
+  {
+    text:"What's your opinion on the free market?",
+    human:["Doesn't feel free to me. Feels like a rigged slot machine.","I just try to make rent. The market doesn't care either way."],
+    bogie:["The market rewards those who play it smart. I try to stay ahead.","It's fair enough, if you know the right levers to pull."],
+    alien:["A beautifully self-correcting mechanism. The weak are correctly priced out.","Markets exist to sort the useful from the surplus."]
+  },
+  {
+    text:"Any thoughts on immigration policy?",
+    human:["People are just trying to survive, same as me.","My grandfather came here with nothing. I don't judge anyone for trying."],
+    bogie:["I just follow whatever's decided upstairs.","Policy is policy. I don't lose sleep over it."],
+    alien:["Immigration is a supply-chain issue. We optimize headcount accordingly.","Borders are simply inventory controls."]
+  },
+  {
+    text:"What do you do for fun?",
+    human:["Fishing, mostly. Cheapest therapy there is.","Watch bad TV with my wife. Nothing fancy."],
+    bogie:["I golf, mostly. Helps with the right people.","Networking events, if I'm honest. It's still fun to me."],
+    alien:["Fun is inefficient. I prefer productivity metrics.","Leisure is a reward tier. I have not yet qualified."]
+  },
+  {
+    text:"How do you feel about the police?",
+    human:["Didn't do much when the plant closed. Nobody did.","They're alright. Overworked, same as the rest of us."],
+    bogie:["I respect the police. Order keeps things running smoothly.","Rules exist for a reason. I appreciate structure."],
+    alien:["They protect assets. That is their sole function.","An enforcement layer. Essential to the hierarchy."]
+  }
+];
+
+const SUBLIMINALS=["OBEY","CONSUME","NO INDEPENDENT THOUGHT","CONFORM","SUBMIT","STAY ASLEEP","MARRY AND REPRODUCE","WATCH TV"];
+
+const ROUNDS=[
+  {n:1,humans:4,bogies:0,budget:6},
+  {n:2,humans:4,bogies:0,budget:6},
+  {n:3,humans:4,bogies:0,budget:5},
+  {n:4,humans:3,bogies:1,budget:5},
+  {n:5,humans:3,bogies:1,budget:5},
+  {n:6,humans:3,bogies:1,budget:4},
+  {n:7,humans:2,bogies:2,budget:4},
+  {n:8,humans:2,bogies:2,budget:4},
+  {n:9,humans:1,bogies:3,budget:3},
+  {n:10,humans:1,bogies:3,budget:3},
+];
+
+/* ---------------- game state ---------------- */
+let state={
+  screen:"start", // start, playing, gameover, win
+  round:0,
+  budget:0,
+  budgetUsed:0,
+  characters:[], // {id,name,type,seed,askedQ:Set}
+  selectedId:null,
+  transcripts:{}, // id -> [{q,a}]
+  pendingAccuse:null,
+};
+
+function buildRound(roundConf){
+  const rng=mulberry32(Date.now()+roundConf.n*7919);
+  const names=shuffle(FIRST_NAMES,rng).slice(0,5).map((f,i)=>f+" "+pick(LAST_NAMES,rng));
+  const types=[];
+  types.push("alien");
+  for(let i=0;i<roundConf.bogies;i++)types.push("bogie");
+  for(let i=0;i<roundConf.humans;i++)types.push("human");
+  const shuffledTypes=shuffle(types,rng);
+  const chars=names.map((name,i)=>({
+    id:"c"+roundConf.n+"_"+i,
+    name,
+    type:shuffledTypes[i],
+    seed:Math.floor(rng()*100000),
+    askedQ:new Set()
+  }));
+  state.characters=chars;
+  state.transcripts={};
+  chars.forEach(c=>state.transcripts[c.id]=[]);
+  state.budget=roundConf.budget;
+  state.budgetUsed=0;
+  state.selectedId=null;
+}
+
+function startGame(){
+  state.screen="playing";
+  state.round=1;
+  buildRound(ROUNDS[0]);
+  render();
+}
+
+function nextRound(){
+  state.round++;
+  if(state.round>ROUNDS.length){
+    state.screen="win";
+    render();
+    return;
+  }
+  buildRound(ROUNDS[state.round-1]);
+  state.screen="playing";
+  render();
+  showToast("ROUND "+(state.round-1)+" CLEARED");
+}
+
+function selectCharacter(id){
+  state.selectedId=(state.selectedId===id)?null:id;
+  render();
+}
+
+function askQuestion(charId, qIndex){
+  if(state.budgetUsed>=state.budget)return;
+  const char=state.characters.find(c=>c.id===charId);
+  if(!char||char.askedQ.has(qIndex))return;
+  const q=QUESTIONS[qIndex];
+  const rng=mulberry32(char.seed+qIndex*13);
+  const pool=q[char.type];
+  const answer=pick(pool,rng);
+  char.askedQ.add(qIndex);
+  state.budgetUsed++;
+  state.transcripts[charId].push({q:q.text,a:answer});
+  render();
+}
+
+function requestAccuse(charId){
+  state.pendingAccuse=charId;
+  render();
+}
+
+function cancelAccuse(){
+  state.pendingAccuse=null;
+  render();
+}
+
+function confirmAccuse(){
+  const charId=state.pendingAccuse;
+  const char=state.characters.find(c=>c.id===charId);
+  state.pendingAccuse=null;
+  if(char.type==="alien"){
+    state.lastResult={id:charId,correct:true};
+    render();
+    setTimeout(()=>nextRound(),900);
+  } else {
+    state.lastResult={id:charId,correct:false};
+    render();
+    setTimeout(()=>{
+      state.screen="gameover";
+      state.caughtType=char.type;
+      render();
+    },900);
+  }
+}
+
+function restartGame(){
+  state={screen:"start",round:0,budget:0,budgetUsed:0,characters:[],selectedId:null,transcripts:{},pendingAccuse:null};
+  render();
+}
+
+function toggleGlasses(){
+  document.body.classList.toggle("glasses-on");
+  const btn=document.querySelector(".glasses-btn");
+  if(btn)btn.classList.toggle("active");
+  if(document.body.classList.contains("glasses-on")){
+    spawnSubliminals();
+  }
+}
+
+let sublimTimer=null;
+function spawnSubliminals(){
+  if(sublimTimer)clearInterval(sublimTimer);
+  sublimTimer=setInterval(()=>{
+    if(!document.body.classList.contains("glasses-on")){clearInterval(sublimTimer);return;}
+    const el=document.createElement("div");
+    el.className="subliminal show";
+    el.textContent=pick(SUBLIMINALS,Math.random);
+    el.style.left=(10+Math.random()*60)+"vw";
+    el.style.top=(15+Math.random()*60)+"vh";
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(),1500);
+  },1800);
+}
+
+function showToast(msg){
+  const t=document.createElement("div");
+  t.className="toast";
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),1900);
+}
+
+/* ---------------- avatar rendering ---------------- */
+function avatarSVG(seed,type,resultClass){
+  const rng=mulberry32(seed);
+  const skinTones=["#d9b382","#c68e5a","#8a5a3b","#e8c8a0","#5c3a24"];
+  const hairColors=["#2b2b2b","#5a4632","#8a7050","#3a3a3a","#1c1c1c"];
+  const skin=pick(skinTones,rng);
+  const hair=pick(hairColors,rng);
+  const hairStyle=Math.floor(rng()*3); // 0 bald/short 1 side part 2 bushy
+  const collarStyle=Math.floor(rng()*3); // 0 collar 1 tie 2 bowtie
+  const collarColor=pick(["#3a3a3a","#5c1a1a","#2b3a4a","#4a3a2b"],rng);
+
+  let hairShape="";
+  if(hairStyle===1){
+    hairShape=`<path d="M18 30 Q39 8 60 30 L60 22 Q39 4 18 22 Z" fill="${hair}"/>`;
+  } else if(hairStyle===2){
+    hairShape=`<path d="M14 34 Q16 6 39 6 Q62 6 64 34 Q54 20 39 20 Q24 20 14 34Z" fill="${hair}"/>`;
+  } else {
+    hairShape=`<path d="M20 26 Q39 10 58 26 L58 20 Q39 8 20 20 Z" fill="${hair}"/>`;
+  }
+
+  let collarShape="";
+  if(collarStyle===0){
+    collarShape=`<path d="M20 88 L32 70 L46 70 L58 88 Z" fill="${collarColor}"/>`;
+  } else if(collarStyle===1){
+    collarShape=`<path d="M20 88 L32 70 L46 70 L58 88 Z" fill="#e8e4d9"/><path d="M36 70 L39 88 L42 70 Z" fill="${collarColor}"/>`;
+  } else {
+    collarShape=`<path d="M20 88 L32 70 L46 70 L58 88 Z" fill="#e8e4d9"/><rect x="33" y="68" width="12" height="6" fill="${collarColor}"/>`;
+  }
+
+  return `<svg viewBox="0 0 78 88" width="78" height="88" xmlns="http://www.w3.org/2000/svg">
+    ${collarShape}
+    <circle cx="39" cy="40" r="24" fill="${skin}"/>
+    ${hairShape}
+    <circle cx="30" cy="42" r="2.4" fill="#1a1a1a"/>
+    <circle cx="48" cy="42" r="2.4" fill="#1a1a1a"/>
+    <path d="M32 54 Q39 58 46 54" stroke="#3a2418" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function alienAvatarSVG(seed){
+  const rng=mulberry32(seed);
+  const skin=pick(["#8fae7a","#7a9a68","#9fb88a","#6f8f5e"],rng);
+  const skinDark=pick(["#5c7a4e","#4f6b42"],rng);
+  return `<svg viewBox="0 0 78 88" width="78" height="88" xmlns="http://www.w3.org/2000/svg">
+    <path d="M20 88 L32 70 L46 70 L58 88 Z" fill="#3a3a3a"/>
+    <path d="M39 8 C22 8 16 26 20 42 C22 54 28 62 39 66 C50 62 56 54 58 42 C62 26 56 8 39 8 Z" fill="${skin}"/>
+    <path d="M39 8 C22 8 16 26 20 42 C22 54 28 62 39 66 C50 62 56 54 58 42 C62 26 56 8 39 8 Z" fill="none" stroke="${skinDark}" stroke-width="1"/>
+    <ellipse cx="27" cy="38" rx="8" ry="11" fill="#0a0a0a" transform="rotate(-12 27 38)"/>
+    <ellipse cx="51" cy="38" rx="8" ry="11" fill="#0a0a0a" transform="rotate(12 51 38)"/>
+    <ellipse cx="25" cy="34" rx="2" ry="2.6" fill="#3a5c30" opacity="0.6" transform="rotate(-12 25 34)"/>
+    <ellipse cx="53" cy="34" rx="2" ry="2.6" fill="#3a5c30" opacity="0.6" transform="rotate(12 53 34)"/>
+    <path d="M35 56 Q39 59 43 56" stroke="${skinDark}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <path d="M39 8 C34 4 44 4 39 8" fill="none"/>
+  </svg>`;
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  const app=document.getElementById("app");
+  if(state.screen==="start"){
+    app.innerHTML=renderStart();
+    document.getElementById("beginBtn").onclick=startGame;
+    return;
+  }
+  if(state.screen==="gameover"){
+    app.innerHTML=renderGameOver();
+    document.getElementById("retryBtn").onclick=restartGame;
+    return;
+  }
+  if(state.screen==="win"){
+    app.innerHTML=renderWin();
+    document.getElementById("retryBtn").onclick=restartGame;
+    return;
+  }
+  app.innerHTML=renderPlaying();
+  wirePlaying();
+}
+
+function renderStart(){
+  return `
+  <div class="fullscreen">
+    <div class="tagline" style="margin-bottom:10px;">A DEDUCTION GAME</div>
+    <h1>THEY <span>LIVE</span></h1>
+    <div class="sub">Alien Lineup</div>
+    <div class="rules">
+      <b>The premise:</b> One face in every lineup of five isn't human. It talks like it owns the place — because somewhere, it thinks it does.<br><br>
+      <b>How to play:</b> Question the lineup. Listen for the tone. Cold, corporate, dehumanizing language means alien. As rounds pass, <b>bogies</b> — human collaborators who've picked up a little of that same cold language — will muddy the water.<br><br>
+      <b>The stakes:</b> Guess wrong once, and the alien walks free. Correctly call out ten lineups in a row and you save the world.
+    </div>
+    <button id="beginBtn" class="big-btn">Begin the lineup</button>
+  </div>`;
+}
+
+function renderGameOver(){
+  const caught=state.caughtType==="human"?"an innocent human":"a collaborator, not the one pulling the strings";
+  return `
+  <div class="fullscreen">
+    <h1><span>THEY WIN</span></h1>
+    <div class="sub">Round ${state.round} of 10</div>
+    <p class="desc">You called it wrong. You accused ${caught}, and the real alien slipped back into the crowd wearing a nicer suit than yours. Somewhere, a used car lot sells a little better tonight.</p>
+    <div class="btn-row">
+      <button id="retryBtn" class="big-btn">Try again</button>
+    </div>
+  </div>`;
+}
+
+function renderWin(){
+  return `
+  <div class="fullscreen">
+    <h1>WE <span>LIVE</span></h1>
+    <div class="sub">All 10 rounds cleared</div>
+    <p class="desc">Ten lineups. Ten correct calls. You saw through every collar, every smile, every line about "efficiency" and "headcount." The signal's down. For now, at least, they don't.</p>
+    <div class="btn-row">
+      <button id="retryBtn" class="big-btn">Play again</button>
+    </div>
+  </div>`;
+}
+
+function renderPlaying(){
+  const conf=ROUNDS[state.round-1];
+  const dots=ROUNDS.map((r,i)=>{
+    let cls="round-dot";
+    if(i<state.round-1)cls+=" done";
+    else if(i===state.round-1)cls+=" current";
+    return `<div class="${cls}"></div>`;
+  }).join("");
+
+  const cards=state.characters.map(c=>{
+    let cls="card";
+    if(state.selectedId===c.id)cls+=" selected";
+    if(state.lastResult&&state.lastResult.id===c.id){
+      cls+= state.lastResult.correct?" correct":" wrong";
+    }
+    const askedCount=c.askedQ.size;
+    const revealAlien=state.lastResult&&state.lastResult.id===c.id&&state.lastResult.correct;
+    const avatarMarkup=revealAlien?alienAvatarSVG(c.seed):avatarSVG(c.seed,c.type);
+    return `
+    <div class="${cls}" data-id="${c.id}">
+      <div class="plate">SUBJECT ${c.id.slice(-1)*1+1}</div>
+      <div class="avatar-wrap${revealAlien?" reveal-alien":""}">${avatarMarkup}</div>
+      <div class="name">${c.name}</div>
+      <div class="asked-count">${askedCount} question${askedCount===1?"":"s"} asked</div>
+      <button class="accuse-btn" data-accuse="${c.id}">Accuse</button>
+    </div>`;
+  }).join("");
+
+  let panel="";
+  if(state.selectedId){
+    const c=state.characters.find(x=>x.id===state.selectedId);
+    const qbuttons=QUESTIONS.map((q,i)=>{
+      const asked=c.askedQ.has(i);
+      const noBudget=state.budgetUsed>=state.budget;
+      return `<button class="qbtn" data-q="${i}" data-char="${c.id}" ${asked||noBudget?"disabled":""}>${q.text}</button>`;
+    }).join("");
+    const lines=state.transcripts[c.id].map(t=>`
+      <div class="line"><div class="q">${t.q}</div><div class="a">${t.a}</div></div>
+    `).join("") || `<div class="panel-empty">No questions asked yet. Pick one below.</div>`;
+
+    panel=`
+    <div class="panel">
+      <div class="panel-header">
+        <div class="who">${c.name}<small>Interrogation transcript</small></div>
+        <button class="close-panel" id="closePanel">Close ✕</button>
+      </div>
+      <div class="qlist">${qbuttons}</div>
+      <div class="transcript">${lines}</div>
+    </div>`;
+  } else {
+    panel=`<div class="panel"><div class="panel-empty">Select a subject above to begin questioning.</div></div>`;
+  }
+
+  let modal="";
+  if(state.pendingAccuse){
+    const c=state.characters.find(x=>x.id===state.pendingAccuse);
+    modal=`
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <h3>Final answer?</h3>
+        <p>You're accusing <b style="color:var(--paper)">${c.name}</b> of being the alien. There's no taking it back once you point.</p>
+        <div class="modal-btns">
+          <button class="modal-btn" id="cancelAccuse">Wait, no</button>
+          <button class="modal-btn primary" id="confirmAccuse">Point and expose</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  return `
+  <div class="topbar">
+    <div>
+      <div class="brand">THEY <span>LIVE</span></div>
+      <div class="tagline">Alien Lineup</div>
+    </div>
+    <button class="glasses-btn">🕶 Put on the sunglasses</button>
+  </div>
+
+  <div class="statusbar">
+    <div>ROUND <b>${state.round}</b> / 10</div>
+    <div class="round-dots">${dots}</div>
+    <div>QUESTIONS LEFT: <b>${state.budget-state.budgetUsed}</b> / ${state.budget}</div>
+  </div>
+
+  <div class="lineup">${cards}</div>
+  ${panel}
+  <div class="footer-note">They live. We sleep. Not tonight.</div>
+  ${modal}
+  `;
+}
+
+function wirePlaying(){
+  document.querySelectorAll(".card").forEach(el=>{
+    el.addEventListener("click",(e)=>{
+      if(e.target.closest(".accuse-btn"))return;
+      selectCharacter(el.dataset.id);
+    });
+  });
+  document.querySelectorAll("[data-accuse]").forEach(el=>{
+    el.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      requestAccuse(el.dataset.accuse);
+    });
+  });
+  const closeBtn=document.getElementById("closePanel");
+  if(closeBtn)closeBtn.onclick=()=>{state.selectedId=null;render();};
+
+  document.querySelectorAll(".qbtn").forEach(el=>{
+    el.addEventListener("click",()=>{
+      askQuestion(el.dataset.char, parseInt(el.dataset.q,10));
+    });
+  });
+
+  const glassesBtn=document.querySelector(".glasses-btn");
+  if(glassesBtn)glassesBtn.onclick=toggleGlasses;
+
+  const cancelBtn=document.getElementById("cancelAccuse");
+  if(cancelBtn)cancelBtn.onclick=cancelAccuse;
+  const confirmBtn=document.getElementById("confirmAccuse");
+  if(confirmBtn)confirmBtn.onclick=confirmAccuse;
+}
+
+render();
+})();
+</script>
+</body>
+</html>
