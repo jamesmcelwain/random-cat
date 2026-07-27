@@ -20,6 +20,7 @@
             background-color: #f0f2f5;
             margin: 0;
             padding: 16px;
+            padding-bottom: 50px; /* Space for alien link at bottom */
             position: relative;
             overflow: hidden; /* Prevents both horizontal and vertical scrollbars from the background chaos */
         }
@@ -212,6 +213,23 @@
             transform: scale(0.96);
         }
 
+        /* --- Alien Link Styling --- */
+        .alien-link {
+            position: absolute;
+            bottom: 12px;
+            z-index: 2;
+            font-size: 20px;
+            text-decoration: none;
+            opacity: 0.7;
+            transition: transform 0.2s, opacity 0.2s;
+            line-height: 1;
+        }
+
+        .alien-link:hover {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -243,6 +261,9 @@
 
         <button id="fetch-btn" class="primary-btn">Get Another Cat</button>
     </div>
+
+    <!-- Small Alien Link -->
+    <a href="alien.html" class="alien-link" title="Alien">👽</a>
 
     <script>
         const catImage = document.getElementById('cat-image');
